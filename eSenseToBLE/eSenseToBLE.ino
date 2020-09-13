@@ -12,7 +12,6 @@
  */
 
 #include "BLEDevice.h"
-//#include "BLEScan.h"
 #include <math.h>
 #include <ESP32Servo.h>
 
@@ -52,8 +51,9 @@ double roll;
 float alpha;
 int counter = 1;
 
-Servo base;  // create servo object to control a servo
-Servo arm1;  // create servo object to control a servo
+ create servo object to control a servo
+Servo base; 
+Servo arm1; 
 Servo arm2;
 
 uint8_t IMUdata[16];
@@ -73,7 +73,7 @@ static void notifyCallback(
     IMUdata[i] = pData[i];
   }
   // Serial.print("\n");
-  gyrox = (short) ((IMUdata[4] * 256) + IMUdata[5]);//(int16_t) ((IMUdata[10] << 8) | (IMUdata[11]));
+  gyrox = (short) ((IMUdata[4] * 256) + IMUdata[5]);//(int16_t) ((IMUdata[4] << 8) | (IMUdata[5]));
   gyroy =  (short) ((IMUdata[6] * 256) + IMUdata[7]);
   gyroz = (short) ((IMUdata[8] * 256) + IMUdata[9]);
 
@@ -87,12 +87,13 @@ static void notifyCallback(
   accz = (double)accz / 8192.0;
 
   //transform values from worn orientation to normal orientation
-  tempx=accx;//temp holders
+  tempx=accx;//temp. holders
   tempy=accy;
   accx=tempy;
   accy=-tempx;
-  
-  angle_roll_gyro = (double)gyroy / 65.5;//gyroy is original
+
+  //covert gyro value to angle
+  angle_roll_gyro = (double)gyroy / 65.5;  
   angle_pitch_gyro = (double)gyroz / 65.5;
 }
 
@@ -163,7 +164,7 @@ class MyAdvertisedDeviceCallbacks: public BLEAdvertisedDeviceCallbacks {
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("Starting Arduino BLE Client application...");
+  Serial.println("Starting ESP32 BLE Client application...");
 
   BLEDevice::init("");
 
@@ -179,19 +180,21 @@ void setup() {
   base.setPeriodHertz(50);
   arm1.setPeriodHertz(50);
   arm2.setPeriodHertz(50);
+  
   //9,10,11
   base.attach(2);  // attaches the servo on pin 9 to the servo object
   arm1.attach(18);  // attaches the servo on pin 10 to the servo object
   arm2.attach(5);  // attaches the servo on pin 11 to the servo object
 
 
+  // Robot home position
   base.write(0);
   delay(15);
   arm1.write(45);
   delay(150);
-
   arm2.write(90);
   delay(15);
+  
   pinMode(16, OUTPUT);
 
 } // End of setup.
@@ -207,7 +210,7 @@ void loop() {
   while (doConnect == true) {
     if (connectToServer(*pServerAddress)) {
       Serial.println("We are now connected to the BLE Server.");
-      digitalWrite(16, HIGH);   // turn the LED on (HIGH is the voltage level)
+      digitalWrite(16, HIGH);   // turn the LED on to signify start of calibration (HIGH is the voltage level)
       connected = true;
       const uint8_t sampleOn[] = {0x53, 0x35, 0x02, 0x01, 0x32};
       for (int i = 0; i < 10; i++) {
@@ -283,7 +286,7 @@ void loop() {
     angle_rollxOffset = angle_rollxOffset + angle_rollx;
     angle_pitchzOffset = angle_pitchzOffset +  angle_pitchz;
 
-    if (counter == 250) { // get 250 sample and average them
+    if (counter == 250) { // get 250 samples when esense is worn and average them
       angle_rollxOffset = (double)angle_rollxOffset / counter;
       angle_pitchzOffset = (double)angle_pitchzOffset / counter;
       Serial.print("OffsetPR:");
@@ -292,6 +295,8 @@ void loop() {
       Serial.println((angle_rollxOffset));
      
       Serial.println("Calibrated");
+
+      // Blink LED to signify end of calibration
       digitalWrite(16, LOW);    // turn the LED off by making the voltage LOW
       delay(1000);
       digitalWrite(16, HIGH);   // turn the LED on (HIGH is the voltage level)
