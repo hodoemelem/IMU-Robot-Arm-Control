@@ -181,8 +181,8 @@ void setup() {
   arm2.setPeriodHertz(50);
   //9,10,11
   base.attach(2);  // attaches the servo on pin 9 to the servo object
-  arm1.attach(18);  // attaches the servo on pin 9 to the servo object
-  arm2.attach(5);  // attaches the servo on pin 9 to the servo object
+  arm1.attach(18);  // attaches the servo on pin 10 to the servo object
+  arm2.attach(5);  // attaches the servo on pin 11 to the servo object
 
 
   base.write(0);
