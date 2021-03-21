@@ -7,10 +7,11 @@ enabling direct control of an inexpensive robot arm in the
 environment. We report on the hardware and software setup,
 as well as the experiment design and early results
 
-Bluetooth Low Energy(BLE)
-ESP32-WROOM-32D
-IMU (Inertial Measurement Unit)
-Frame transformation
-Sensor fusion with complementary filter 
-
+# 3-DOF robot arm
+# Bluetooth Low Energy(BLE)
+# ESP32-WROOM-32D
+# IMU (Inertial Measurement Unit)
+# Frame transformation
+# Sensor fusion with complementary filter 
+# mg996r servo motors
 https://doi.org/10.1145/3345615.3361138
